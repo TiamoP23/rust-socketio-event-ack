@@ -75,7 +75,7 @@ impl Socket {
     /// Emits to certain event with given data. The data needs to be JSON,
     /// otherwise this returns an `InvalidJson` error.
     pub fn emit(&self, nsp: &str, event: Event, data: Payload) -> Result<()> {
-        let socket_packet = self.build_packet_for_payload(data, event, nsp, None)?;
+        let socket_packet = self.build_packet_for_payload(data, event, nsp, None, false)?;
 
         self.send(socket_packet)
     }
@@ -89,6 +89,7 @@ impl Socket {
         event: Event,
         nsp: &'a str,
         id: Option<i32>,
+        is_ack: bool,
     ) -> Result<Packet> {
         match payload {
             Payload::Binary(bin_data) => Ok(Packet::new(
@@ -104,14 +105,26 @@ impl Socket {
                 Some(vec![bin_data]),
             )),
             Payload::String(str_data) => {
-                let payload = if serde_json::from_str::<IgnoredAny>(&str_data).is_ok() {
-                    format!("[\"{event}\",{str_data}]")
+                let package_type;
+                let payload;
+                if is_ack {
+                    payload = if serde_json::from_str::<serde_json::Value>(&str_data).is_ok() {
+                        format!("[{}]", str_data)
+                    } else {
+                        format!("[\"{}\"]", str_data)
+                    };
+                    package_type = PacketId::Ack;
                 } else {
-                    format!("[\"{event}\",\"{str_data}\"]")
+                    payload = if serde_json::from_str::<serde_json::Value>(&str_data).is_ok() {
+                        format!("[\"{}\",{}]", String::from(event), str_data)
+                    } else {
+                        format!("[\"{}\",\"{}\"]", String::from(event), str_data)
+                    };
+                    package_type = PacketId::Event;
                 };
 
                 Ok(Packet::new(
-                    PacketId::Event,
+                    package_type,
                     nsp.to_owned(),
                     Some(payload),
                     id,
