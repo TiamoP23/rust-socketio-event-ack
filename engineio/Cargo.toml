@@ -1,6 +1,6 @@
 [package]
 name = "rust_engineio"
-version = "0.4.3"
+version = "0.4.4"
 authors = ["Bastian Kersting <bastian@cmbt.de>"]
 edition = "2021"
 description = "An implementation of a engineio client written in rust."
@@ -13,7 +13,7 @@ license = "MIT"
 [dependencies]
 base64 = "0.21.2"
 bytes = "1"
-reqwest = { version = "0.11.16", features = ["blocking", "native-tls", "stream"] }
+reqwest = { version = "0.11.22", features = ["blocking", "native-tls", "stream"] }
 adler32 = "1.2.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -22,7 +22,7 @@ tokio-tungstenite = { version = "0.20.1", features = ["native-tls"] }
 tungstenite = "0.20.1"
 tokio = "1.16.1"
 futures-util = { version = "0.3", default-features = false, features = ["sink"] }
-async-trait = "0.1.68"
+async-trait = "0.1.74"
 async-stream = "0.3.5"
 thiserror = "1.0"
 native-tls = "0.2.11"
